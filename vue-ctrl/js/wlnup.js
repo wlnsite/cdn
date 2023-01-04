@@ -1,22 +1,20 @@
 ﻿var wlnup = window.wlnup = function (cfgs) {
 	let obj = { asset: '//static.wlniao.com/wlniao/wlnup/', ext: '', upback: function (rlt) { } }
-	obj.opt = { el: '', to: 'local', thumb: true, suffix: '', width: 60, height: 60, radius: 6, hover: 2000, border: '1px dashed #9E9E9E' }
-	obj.cfg = { host: '', filter: '', bucket: '', policy: '', signature: '', path: '/upload', _filter: '.png,.jpg,.jpeg,.svg,.gif' }
-	obj.set = function (cfg) {
-		for (var i in cfg) {
-			obj.cfg[i] = cfg[i]
-		}
-	}
+	obj.cfg = { to: 'local', path: '/upload', host: '', dir: '', bucket: '', policy: '', signature: '', filter: '', _filter: '.png,.jpg,.jpeg,.svg,.gif' }//基础配置
+	obj.opt = { el: '', width: 60, height: 60, radius: 6, suffix: '', hover: 2000, border: '1px dashed #9E9E9E' }//绑定配置
+	for (var i in cfgs) { obj.cfg[i] = cfgs[i] }
 	obj.click = function () {
-		if (obj.box) {
-			obj.box.click()
-		}
+		if (obj.box) { obj.box.click() }
 	}
 	obj.value = function () {
 		let ele = document.getElementById(obj.opt.el)
-		if (ele.value) {
+		if (ele && ele.value) {
 			return ele.value.split(',').join(',')
-		}
+		} else if (obj.opt.value) {
+			return obj.opt.value.split(',').join(',')
+		} else {
+			return ''
+        }
 		return ''
 	}
 	obj.bind = function (a0, a1, a2, a3) {
@@ -33,30 +31,20 @@
 			opt = a0
 		}
 		let o = _bindset(opt)
-		let ele = document.getElementById(o.el);
-		let box = document.createElement('div');
-		let rmi = document.createElement('div');
-		let img = document.createElement('img');
-		let pro = document.createElement('div');
-		function _show(url) {
-			if (url) {
+		function _show(_u) {
+			if (_u) {
 				if (o._filter.indexOf(obj.ext) < 0) {
 					img.src = _extIcon();
 				} else {
-					let _u = ele.value;
-					if (_u.indexOf('//') < 0) {
-						_u = o.host + _u;
-					}
-					if (o.thumb) {
-						if (o.suffix) {
-							_u = _u + o.suffix;
-						} else if (o.to === 'oss') {
-							_u = _u + '?x-oss-process=image/resize,m_pad,w_' + o.width + ',h_' + o.height
-						} else if (o.to === 'cos') {
-							_u = _u + '?imageMogr2/crop/' + o.width + 'x' + o.height
-						} else if (o.to === 'upyun') {
-							_u = _u + '!/both/' + o.width + 'x' + o.height;
-						}
+					if (_u.indexOf('//') < 0 && o.host) { _u = o.host + _u }
+					if (o.suffix) {
+						_u = _u + o.suffix;
+					} else if (o.to === 'oss') {
+						_u = _u + '?x-oss-process=image/resize,m_pad,w_' + o.width + ',h_' + o.height
+					} else if (o.to === 'cos') {
+						_u = _u + '?imageMogr2/crop/' + o.width + 'x' + o.height
+					} else if (o.to === 'upyun') {
+						_u = _u + '!/both/' + o.width + 'x' + o.height;
 					}
 					img.src = _u
 				}
@@ -65,12 +53,17 @@
 		}
 		function _upback(rlt) {
 			pro.style.display = 'none'
-			if (rlt.success) {
-				ele.value = rlt.path
+			let ele = document.getElementById(o.el)
+			if (ele && rlt.success) {
+				ele.value = rlt.url
 				_show(rlt.url)
 			}
 			_tipback(rlt)
 		}
+		let box = document.createElement('div');
+		let rmi = document.createElement('div');
+		let img = document.createElement('img');
+		let pro = document.createElement('div');
 		box.style.cursor = 'pointer'
 		box.style.position = 'relative'
 		box.style.display = 'inline-block'
@@ -83,13 +76,17 @@
 		box.style.height = o.height + 'px'
 		box.style.background = '#fff url(' + obj.asset + 'wlnup.svg) center center no-repeat'
 		box.style.backgroundSize = '50% 50%'
-		box.onclick = function () {
+		box.onclick = () => {
 			obj.progress = function (e) {
 				var _temp = o.width * (e.loaded / e.total) + 1
 				pro.style.width = (_temp > o.width ? o.width : _temp) + 'px'
 				pro.style.display = 'block'
 			}
-			if (o.to === 'oss') {
+			if (o.to === 'emi') {
+				obj.select(function (file) {
+					obj.emi(file, _upback)
+				})
+			} else if (o.to === 'oss') {
 				if (!o.policy) {
 					_tipback({ success: false, message: 'not set policy' })
 				} else if (!o.ossaccesskeyid) {
@@ -121,7 +118,7 @@
 				_w.upyun(function (data) {
 					__pro.hide();
 					if (data.success) {
-						__ele.val(data.path);
+						__ele.val(data.url);
 						if (_self._set._filter.indexOf(_self._ext) < 0) {
 							__img.attr('src', _self.ext())
 						} else {
@@ -157,11 +154,11 @@
 		rmi.style.height = '100%'
 		rmi.style.background = 'rgba(0,0,0,0.5) url(' + obj.asset + 'close.svg) center center no-repeat'
 		rmi.style.backgroundSize = '30% 30%'
-		rmi.onclick = function (e) {
+		rmi.onclick = (e) => {
 			e.stopPropagation()
 			rmi.style.display = 'none'
 			img.style.display = 'none'
-			ele.value = ''
+			document.getElementById(o.el).value = ''
 		}
 
 		img.style.cursor = 'pointer'
@@ -190,11 +187,17 @@
 		box.appendChild(rmi)
 		box.appendChild(img)
 		box.appendChild(pro)
-		ele.parentNode.insertBefore(box, ele)
-		if (ele.value) {
-			obj.ext = ele.value.substring(ele.value.lastIndexOf('.'))
-			_show(ele.value)
-		}
+		setTimeout(() => {
+			let ele = document.getElementById(o.el);
+			if (ele) {
+				if (o.value) { ele.value = o.value } else { o.value = ele.value }
+				ele.parentNode.insertBefore(box, ele)
+            }
+			if (o.value) {
+				obj.ext = ele.value.substring(o.value.lastIndexOf('.'))
+				_show(o.value)
+			}
+		}, 100)
 	}
 	obj.bindlist = function (a0, a1, a2, a3) {
 		let opt = {}
@@ -210,10 +213,6 @@
 			opt = a0
 		}
 		let o = _bindset(opt)
-		var ele = document.getElementById(o.el)
-		var lst = document.createElement('div')
-		var pro = document.createElement('div')
-		var add = document.createElement('div')
 		function _showone(url) {
 			let box = document.createElement('div')
 			let rmi = document.createElement('div')
@@ -242,8 +241,12 @@
 			rmi.setAttribute('ourl', url)
 			rmi.onclick = function (e) {
 				e.stopPropagation()
+				let ele = document.getElementById(o.el)
 				let imgs = ele.value.split(',')
 				let ourl = rmi.getAttribute('ourl')
+				if (ourl.indexOf('?')) { ourl = ourl.substring(0, ourl.indexOf('?')) }
+				if (ourl.indexOf('!')) { ourl = ourl.substring(0, ourl.indexOf('!')) }
+				if (o.host && ourl.indexOf(o.host) == 0) { ourl = ourl.substring(o.host.length) }
 				let _index = imgs.indexOf(ourl)
 				imgs.splice(_index, 1);
 				ele.value = imgs.join(',')
@@ -268,19 +271,15 @@
 			if (o._filter.indexOf(ext) < 0) {
 				img.src = _extIcon()
 			} else {
-				if (url.indexOf('//') < 0) {
-					url = o.host + url;
-				}
-				if (o.thumb) {
-					if (o.suffix) {
-						url = url + o.suffix;
-					} else if (o.to === 'oss') {
-						url = url + '?x-oss-process=image/resize,m_pad,w_' + o.width + ',h_' + o.height;
-					} else if (o.to === 'cos') {
-						url = url + '?imageMogr2/crop/' + o.width + 'x' + o.height
-					} else if (o.to === 'upyun') {
-						url = url + '!/both/' + o.width + 'x' + o.height;
-					}
+				if (url.indexOf('//') < 0 && o.hos) { url = o.host + url }
+				if (o.suffix) {
+					url = url + o.suffix;
+				} else if (o.to === 'oss') {
+					url = url + '?x-oss-process=image/resize,m_pad,w_' + o.width + ',h_' + o.height;
+				} else if (o.to === 'cos') {
+					url = url + '?imageMogr2/crop/' + o.width + 'x' + o.height
+				} else if (o.to === 'upyun') {
+					url = url + '!/both/' + o.width + 'x' + o.height;
 				}
 				img.src = url;
 			}
@@ -298,20 +297,21 @@
 		}
 		function _upback(rlt) {
 			pro.style.display = 'none'
-			if (rlt.success) {
+			let ele = document.getElementById(o.el)
+			if (ele && rlt.success) {
 				_showone(rlt.url)
 				let imgs = ele.value.split(',')
-				imgs.push(rlt.path)
+				imgs.push(rlt.url)
 				ele.value = imgs.join(',')
 			}
 			_tipback(rlt)
 		}
-
+		let lst = document.createElement('div')
+		let pro = document.createElement('div')
+		let add = document.createElement('div')
 		lst.style.position = 'relative'
 		lst.style.display = 'inline-block'
 		lst.style.height = o.height + 'px'
-
-
 		pro.style.background = '#4CAF50'
 		pro.style.position = 'absolute'
 		pro.style.display = 'none'
@@ -332,13 +332,17 @@
 		add.style.height = o.height + 'px'
 		add.style.background = '#fff url(' + obj.asset + 'wlnup.svg) center center no-repeat'
 		add.style.backgroundSize = '50% 50%'
-		add.onclick = function () {
+		add.onclick = () => {
 			obj.progress = function (e) {
 				var _temp = o.width * (e.loaded / e.total) + 1
 				pro.style.width = (_temp > o.width ? o.width : _temp) + 'px'
 				pro.style.display = 'block'
 			}
-			if (o.to === 'oss') {
+			if (o.to === 'emi') {
+				obj.select(function (file) {
+					obj.emi(file, _upback)
+				})
+			} else if (o.to === 'oss') {
 				if (!o.ossdomain) {
 					_tipback({ success: false, message: 'not set ossdomain' })
 				} else if (!o.ossaccesskeyid) {
@@ -370,7 +374,7 @@
 				_w.upyun(function (data) {
 					__pro.hide();
 					if (data.success) {
-						__ele.val(data.path);
+						__ele.val(data.url);
 						if (_self._set._filter.indexOf(_self._ext) < 0) {
 							__img.attr('src', _self.ext());
 						} else {
@@ -398,9 +402,43 @@
 		}
 		add.appendChild(pro)
 		lst.appendChild(add)
-		ele.parentNode.insertBefore(lst, ele)
-		if (ele.value) {
-			_show(ele.value)
+		setTimeout(() => {
+			let ele = document.getElementById(o.el)
+			if (ele) {
+				if (o.value) { ele.value = o.value } else { o.value = ele.value }
+				ele.parentNode.insertBefore(lst, ele)
+			}
+			if (o.value) { _show(o.value) }
+		}, 100)
+	}
+	obj.emi = function (file, fn) {
+		let rdname = ''
+		let chars = 'abcdefghijklmnoparstuvwxyz0123456789'
+		for (i = 0; i < 10; i++) {
+			rdname += chars.charAt(Math.floor(Math.random() * chars.length))
+		}
+		obj.ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
+		if (obj.cfg.filter && obj.cfg.filter != '.*' && obj.cfg.filter.indexOf(obj.ext) < 0) {
+			_tipback({ success: false, message: 'server not accept upload ' + obj.ext });
+		} else {
+			let key = rdname + obj.ext
+			let fd = new FormData()
+			fd.append("key", key)
+			fd.append("file", file)
+			fd.append("token", obj.cfg.token)
+			let ajax = _ajax()
+			ajax.open("post", obj.cfg.path, true)
+			ajax.onreadystatechange = function () {
+				if (ajax.readyState == 4) {
+					if (ajax.status >= 200 && ajax.status < 300) {
+						fn(eval('(' + ajax.responseText + ')'))
+					} else {
+						fn({ success: false, message: ajax.responseText || ajax.statusText })
+					}
+				}
+			}
+			ajax.upload.onprogress = obj.progress
+			ajax.send(fd)
 		}
 	}
 	obj.oss = function (file, fn) {
@@ -410,7 +448,7 @@
 			rdname += chars.charAt(Math.floor(Math.random() * chars.length))
 		}
 		obj.ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '.jpg'
-		if (obj.cfg.filter != '.*' && obj.cfg.filter.indexOf(obj.ext) < 0) {
+		if (obj.cfg.filter && obj.cfg.filter != '.*' && obj.cfg.filter.indexOf(obj.ext) < 0) {
 			_tipback({ success: false, message: 'server not accept upload ' + obj.ext });
 		} else {
 			let key = obj.cfg.dir + rdname + obj.ext
@@ -507,10 +545,8 @@
 		let _attType = document.createAttribute("type");
 		_attType.nodeValue = "file"
 		_up.setAttributeNode(_attType)
-		if (obj.cfg.filter == obj.cfg._filter || !obj.cfg.filter) {
-			if (!obj.cfg.filter) {
-				obj.cfg.filter = obj.cfg._filter
-			}
+		if (!obj.cfg.filter) { obj.cfg.filter = obj.cfg._filter }
+		if (obj.cfg.filter == obj.cfg._filter) {
 			var _attAccept = document.createAttribute("accept");
 			_attAccept.nodeValue = "image/*"
 			_up.setAttributeNode(_attAccept)
@@ -544,15 +580,9 @@
 		}
 	}
 	function _bindset(opt) {
-		for (var i in opt) {
-			obj.opt[i] = opt[i]
-		}
-		for (var i in obj.opt) {
-			opt[i] = obj.opt[i]
-		}
-		for (var i in obj.cfg) {
-			opt[i] = obj.cfg[i]
-		}
+		for (var i in opt) { obj.opt[i] = opt[i] }
+		for (var i in obj.opt) { opt[i] = obj.opt[i] }
+		for (var i in obj.cfg) { opt[i] = obj.cfg[i] }
 		return opt
 	}
 	function _extIcon() {
@@ -587,6 +617,5 @@
 		}
 		return xmlHttp
 	}
-	obj.set(cfgs)
 	return obj
 }
