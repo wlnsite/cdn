@@ -678,23 +678,13 @@ section.cover {
     background-color: #fff
 }
 
-.sidebar {
-    color: #364149
-}
 
     .sidebar li, .sidebar li p, .sidebar li a {
         color: #364149;
-        font-size: 15px;
-        font-weight: 700;
         text-decoration: none;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-    }
-    .sidebar ul ul li > a, .sidebar ul ul li > p, .sidebar ul ul li > p > a {
-        color: #34495e;
-        font-weight: 400;
-        font-size: 14px;
     }
 
     .sidebar ul li > a:hover, .sidebar ul li > p > a:hover {
@@ -709,7 +699,18 @@ section.cover {
         color: var(--theme-color,#42b983);
         font-weight: 600
     }
-
+.sidebar-nav > ul > li, .sidebar-nav > ul > li > a {
+    color: #364149;
+    font-size: 15px;
+    font-weight: 700;
+}
+.sidebar-nav > ul > li > ul {
+    font-size: 14px;
+    font-weight: 400;
+}
+.sidebar-nav > ul > li > ul > li > ul > li * {
+    color: #53585c;
+}
 .app-sub-sidebar li:before {
     content: "-";
     padding-right: 4px;
