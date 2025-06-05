@@ -55,7 +55,10 @@
 <div class="main">
   <div class="hero"><div id="gear"></div></div>
   <h1>加速中</h1>
-  <p>By: https://cdn.wlniao.com</p>
+  <p id="by"></p>
 </div>
+<script>
+document.getElementById('by').innerHTML = 'By:' + location.origin
+</script>
 </body>
 </html>
