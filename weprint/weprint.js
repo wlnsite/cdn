@@ -21,14 +21,15 @@ function weprintLoad(method, url) {
 function weprint(eleId) {
     var allBody = arguments.length == 0;
     var _temp = {};
-    if (_temp.success) {
-        _print(_temp);
-    } else {
-        $.getJSON("https://openapi.wlniao.com/jsapi/weprint?callback=?&id=" + _weprintId, function (obj) {
-            _temp = obj;
-            _print(_temp);
-        });
-    }
+    //if (_temp.success) {
+    //    _print(_temp);
+    //} else {
+    //    $.getJSON("https://openapi.wlniao.com/jsapi/weprint?callback=?&id=" + _weprintId, function (obj) {
+    //        _temp = obj;
+    //        _print(_temp);
+    //    });
+    //}
+     _print(_temp);
     function _print(obj) {
         if (obj.success) {
             html2canvas(allBody ? document.body : document.all.item(eleId), {
