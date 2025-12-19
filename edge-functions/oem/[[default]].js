@@ -14,6 +14,7 @@ async function handleRequest(event) {
     return fetch(request);
   }
 
+
   return new Response('Not found: ' + url.pathname.toLowerCase() , { status: 404 });
   for(let i = dirList.length; i > 1; i--)
   {
