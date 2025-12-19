@@ -1,5 +1,6 @@
-export default function onRequest(event) {
-  const { request } = event;
+export default function onRequest(context) {
+  return new Response('test' , { status: 404 });
+  const { request } = context;
   const url = new URL(request.url);
   const dirList = url.pathname.split('/').filter(item => item !== "");
 
