@@ -2,10 +2,6 @@ async function handleRequest(event) {
   const { request } = event;
   const url = new URL(request.url);
   const dirList = url.pathname.split('/').filter(item => item !== "");
-  if (/\.(jpe?g|png)$/.test(urlInfo.pathname)) {
-    // 请求为图片资源时，抛出异常回源站处理
-    throw '404';
-  }
 
   // List of static file extensions to pass through
   const staticExtensions = [ '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp'];
@@ -18,6 +14,7 @@ async function handleRequest(event) {
     return fetch(request);
   }
 
+  return new Response('Not found: ' + url.pathname.toLowerCase() , { status: 404 });
   for(let i = dirList.length; i > 1; i--)
   {
     let path = dirList[0];
@@ -25,12 +22,12 @@ async function handleRequest(event) {
     {
       path = path + '/' + dirList[c];
     }
-    const resPNG = await fetch(`https://${urlInfo.hostname}/${path}.png`);
+    const resPNG = await fetch(`https://${url.hostname}/${path}.png`);
     if(resPNG.headers.get('content-type') == 'image/png')
     {
       return resPNG;
     }
-    const resJPG = await fetch(`https://${urlInfo.hostname}/${path}.jpg`);
+    const resJPG = await fetch(`https://${url.hostname}/${path}.jpg`);
     if(resJPG.headers.get('content-type') == 'image/jpeg')
     {
       return resJPG;
