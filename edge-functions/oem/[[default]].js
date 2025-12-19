@@ -1,5 +1,4 @@
-export default function onRequest(context) {
-  return new Response('test' , { status: 404 });
+export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
   const dirList = url.pathname.split('/').filter(item => item !== "");
@@ -15,8 +14,6 @@ export default function onRequest(context) {
     return fetch(request);
   }
 
-
-  return new Response('Not found: ' + url.pathname.toLowerCase() , { status: 404 });
   for(let i = dirList.length; i > 1; i--)
   {
     let path = dirList[0];
@@ -24,16 +21,25 @@ export default function onRequest(context) {
     {
       path = path + '/' + dirList[c];
     }
-    const resPNG = await fetch(`https://${url.hostname}/${path}.png`);
-    if(resPNG.headers.get('content-type') == 'image/png')
+
+    const png = await fetch(`https://${url.hostname}/${path}.png`);
+    if(png.ok)
     {
-      return resPNG;
+      return new Response(png.body, { status: png.status, headers: png.headers });
     }
-    const resJPG = await fetch(`https://${url.hostname}/${path}.jpg`);
-    if(resJPG.headers.get('content-type') == 'image/jpeg')
+
+    const jpg = await fetch(`https://${url.hostname}/${path}.jpg`);
+    if(jpg.ok)
     {
-      return resJPG;
+      return new Response(jpg.body, { status: jpg.status, headers: jpg.headers });
     }
+
+    const ico = await fetch(`https://${url.hostname}/${path}.ico`);
+    if(ico.ok)
+    {
+      return new Response(ico.body, { status: ico.status, headers: ico.headers });
+    }
+
   }
   return new Response('Not found' , { status: 404 });
 }
