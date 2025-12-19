@@ -1,4 +1,4 @@
-async function handleRequest(event) {
+export default function onRequest(event) {
   const { request } = event;
   const url = new URL(request.url);
   const dirList = url.pathname.split('/').filter(item => item !== "");
